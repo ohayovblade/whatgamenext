@@ -1,27 +1,19 @@
-import Link from 'next/link';
+import type { GetServerSideProps } from 'next';
+import { getSessionUserId } from '@/lib/auth/session';
 
-// Landing page — reachable by visitors (AC: visitors can see landing/login/signup).
-export default function Home() {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-6 p-8 text-center">
-      <h1 className="text-3xl font-bold">WhatGameNext</h1>
-      <p className="text-slate-600">
-        Track your video-game backlog. Sign up or log in to get started.
-      </p>
-      <div className="flex gap-4">
-        <Link
-          href="/signup"
-          className="rounded bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
-        >
-          Sign up
-        </Link>
-        <Link
-          href="/login"
-          className="rounded border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100"
-        >
-          Log in
-        </Link>
-      </div>
-    </main>
-  );
+// `/` is a router, not a page: logged-in users go to their dashboard, everyone
+// else lands on /login. (Replaces the old landing page with the sign-up/log-in
+// buttons.) The redirect happens server-side so visitors never see a flash.
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const userId = await getSessionUserId(ctx);
+  return {
+    redirect: {
+      destination: userId ? '/dashboard' : '/login',
+      permanent: false,
+    },
+  };
+};
+
+export default function Index() {
+  return null;
 }

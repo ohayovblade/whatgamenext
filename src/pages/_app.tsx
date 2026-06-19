@@ -2,6 +2,8 @@ import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import { CacheProvider, type EmotionCache } from '@emotion/react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import createEmotionCache from '@/lib/mui/create-emotion-cache';
 import theme from '@/lib/mui/theme';
 import '@/styles/globals.css';
@@ -23,9 +25,11 @@ export default function App({
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <SessionProvider session={session}>
-          <Component {...pageProps} />
-        </SessionProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <SessionProvider session={session}>
+            <Component {...pageProps} />
+          </SessionProvider>
+        </LocalizationProvider>
       </ThemeProvider>
     </CacheProvider>
   );

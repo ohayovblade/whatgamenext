@@ -9,11 +9,12 @@ import {
   MenuItem,
   IconButton,
   Popover,
-  TextField,
   Stack,
   Tooltip,
   type SelectChangeEvent,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { type Dayjs } from 'dayjs';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import type { BacklogEntry, BacklogPatch } from '@/lib/db/backlog';
@@ -24,6 +25,17 @@ function statusColor(status: string): string {
   if (status === 'Completed') return '#248046';
   if (status === 'Dropped') return '#80848e';
   return '#4e5058'; // Not Started
+}
+
+// The backlog stores dates as 'YYYY-MM-DD' strings; the MUI DatePicker speaks
+// Dayjs. These two helpers bridge the two directions, treating empty/invalid as
+// null so clearing a field round-trips to the API as null.
+function toDayjs(value: string | null): Dayjs | null {
+  return value ? dayjs(value) : null;
+}
+
+function fromDayjs(value: Dayjs | null): string | null {
+  return value && value.isValid() ? value.format('YYYY-MM-DD') : null;
 }
 
 function dayspan(start: string | null, end: string | null): number | null {
@@ -148,23 +160,27 @@ export default function GameCard({ entry, onPatch, onDelete }: Props) {
       >
         <Stack spacing={2} sx={{ p: 2, width: 220 }}>
           <Typography variant="subtitle2">Play timeline</Typography>
-          <TextField
-            type="date"
-            size="small"
+          <DatePicker
             label="Started"
-            InputLabelProps={{ shrink: true }}
-            value={entry.startDate ?? ''}
-            inputProps={{ max: entry.endDate ?? undefined, 'data-testid': `start-${entry.id}` }}
-            onChange={(e) => onPatch(entry.id, { startDate: e.target.value || null })}
+            format="YYYY-MM-DD"
+            value={toDayjs(entry.startDate)}
+            maxDate={toDayjs(entry.endDate) ?? undefined}
+            onChange={(d) => onPatch(entry.id, { startDate: fromDayjs(d) })}
+            slotProps={{
+              textField: { size: 'small', inputProps: { 'data-testid': `start-${entry.id}` } },
+              field: { clearable: true },
+            }}
           />
-          <TextField
-            type="date"
-            size="small"
+          <DatePicker
             label="Finished"
-            InputLabelProps={{ shrink: true }}
-            value={entry.endDate ?? ''}
-            inputProps={{ min: entry.startDate ?? undefined, 'data-testid': `end-${entry.id}` }}
-            onChange={(e) => onPatch(entry.id, { endDate: e.target.value || null })}
+            format="YYYY-MM-DD"
+            value={toDayjs(entry.endDate)}
+            minDate={toDayjs(entry.startDate) ?? undefined}
+            onChange={(d) => onPatch(entry.id, { endDate: fromDayjs(d) })}
+            slotProps={{
+              textField: { size: 'small', inputProps: { 'data-testid': `end-${entry.id}` } },
+              field: { clearable: true },
+            }}
           />
           {span !== null && (
             <Typography variant="body2" color="primary">
