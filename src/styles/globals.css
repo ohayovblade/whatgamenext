@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#1e1f22] text-[#dbdee1];
+}
+
+@layer utilities {
+  /* Living blurple backdrop for the auth screens — slowly pans the gradient. */
+  .auth-gradient {
+    background: linear-gradient(-45deg, #5865f2, #404eed, #7289da, #4752c4);
+    background-size: 300% 300%;
+    animation: gradient-pan 14s ease infinite;
+  }
+
+  /* Card entrance: gentle fade + rise on mount. */
+  .animate-card-in {
+    animation: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Accessibility: honor users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-gradient {
+    animation: none;
+  }
+  .animate-card-in {
+    animation: none;
+  }
+}
